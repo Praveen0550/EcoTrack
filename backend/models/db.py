@@ -8,24 +8,23 @@ db_client = None
 USE_FIREBASE = Config.USE_FIREBASE
 
 if USE_FIREBASE:
-    import firebase_admin
-    from firebase_admin import credentials, firestore
-    
-    # Initialize Firebase Admin once
     try:
-        if not firebase_admin._apps:
-            cred = credentials.Certificate({
-                "type": "service_account",
-                "project_id": Config.FIREBASE_PROJECT_ID,
-                "private_key": Config.FIREBASE_PRIVATE_KEY,
-                "client_email": Config.FIREBASE_CLIENT_EMAIL,
-                "token_url": "https://oauth2.googleapis.com/token",
-            })
-            firebase_admin.initialize_app(cred)
-        db_client = firestore.client()
-        print("Firebase Admin successfully initialized. Mode: FIRESTORE")
+        import firebase_admin
+        from firebase_admin import credentials, firestore
+
+        # Initialize Firebase Admin once
+        try:
+            if not firebase_admin._apps:
+                cred = credentials.Certificate("serviceAccountKey.json")
+                firebase_admin.initialize_app(cred)
+            db_client = firestore.client()
+            print("Firebase Admin successfully initialized. Mode: FIRESTORE")
+        except Exception as e:
+            print(f"Error initializing Firebase Admin: {e}. Falling back to SQLite mode.")
+            USE_FIREBASE = False
     except Exception as e:
-        print(f"Error initializing Firebase Admin: {e}. Falling back to SQLite mode.")
+        # firebase_admin not installed or import failed
+        print(f"firebase_admin import failed: {e}. Falling back to SQLite mode.")
         USE_FIREBASE = False
 
 # SQLite database file path

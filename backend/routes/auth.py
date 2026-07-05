@@ -30,15 +30,16 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
+
         # Extract Authorization header
         if "Authorization" in request.headers:
             auth_header = request.headers["Authorization"]
             if auth_header.startswith("Bearer "):
                 token = auth_header.split(" ")[1]
-                
+
         if not token:
             return jsonify({"error": "Authorization token is missing"}), 401
-            
+
         try:
             if USE_FIREBASE:
                 # Validate Firebase ID Token
@@ -47,14 +48,20 @@ def login_required(f):
                 request.email = decoded_token.get("email", "")
             else:
                 # Validate Local JWT Token
-                decoded_token = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
+                decoded_token = jwt.decode(
+                    token,
+                    Config.SECRET_KEY,
+                    algorithms=["HS256"]
+                )
                 request.uid = decoded_token["uid"]
                 request.email = decoded_token.get("email", "")
+
         except Exception as e:
             print(f"Token verification failed: {e}")
             return jsonify({"error": "Token is invalid or expired"}), 401
-            
+
         return f(*args, **kwargs)
+
     return decorated
 
 @auth_bp.route("/signup", methods=["POST"])

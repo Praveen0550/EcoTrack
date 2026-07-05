@@ -21,18 +21,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://192.168.56.1:5173"
-            ]
-        }
-    }
-)
+    # CORS Configuration
+    CORS(app, supports_credentials=True)
 
     db_init()
 
@@ -66,6 +56,17 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     port = Config.PORT
+
     logger.info("EcoTrack API Server starting on port %d...", port)
-    logger.info("Mode: %s", "Firebase Firestore + Firebase Auth" if Config.USE_FIREBASE else "Local SQLite + Local JWT Fallback")
-    app.run(host="127.0.0.1", port=port, debug=Config.FLASK_ENV == "development")
+    logger.info(
+        "Mode: %s",
+        "Firebase Firestore + Firebase Auth"
+        if Config.USE_FIREBASE
+        else "Local SQLite + Local JWT Fallback"
+    )
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=Config.FLASK_ENV == "development"
+    )

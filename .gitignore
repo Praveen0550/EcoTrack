@@ -2,6 +2,7 @@
 .env
 backend/.env
 frontend/.env
+backend/serviceAccountKey.json
 
 # Python virtual environment
 backend/.venv/
